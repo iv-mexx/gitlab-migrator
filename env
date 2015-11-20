@@ -1,0 +1,7 @@
+// TODO: Enter the required information below
+// TODO: Change the name of this file to `.env` (remove the dot)
+// TODO: Remove this notice and make sure that you dont commit `.env` to keep your tokens save
+FL_GITLAB_ENDPOINT_SRC=
+FL_GITLAB_TOKEN_SRC=
+FL_GITLAB_ENDPOINT_DST=
+FL_GITLAB_TOKEN_DST=
