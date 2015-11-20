@@ -1,5 +1,30 @@
 This tool is based on [fastlane](https://fastlane.tools), different actions are implemented in therms of `lanes`.
 
+### Usage
+
+#### List Projects
+
+You can print a list of all projects on the source gitlab with this command:
+
+```
+fastlane list_projects
+```` 
+
+This will also show projects that have already been migrated.
+**Attention:** Keep in mind that projects are matched by name, so if you have migrated a project already and changed its name, it will **not** show up as migrated!
+
+#### Migrate a Project
+
+You can migrate a specific project with this command:
+
+```
+fastlane migrate project:<project_path>
+```
+
+The `project_path` is the full path to the project in gitlab (including the namespace), you can take the a path as printed in the `list_projects` action. 
+
+As an example, `fastlane migrate project:mexx-uni/pue1` will migrate the project `pue1` in the `mexx-uni` group.
+
 ### Setup
 
 In order to access the gitlab instances, you'll need to provide their endpoint and an API access-token.
