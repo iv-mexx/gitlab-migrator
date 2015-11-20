@@ -1,0 +1,62 @@
+# Customise this file, documentation can be found here:
+# https://github.com/KrauseFx/fastlane/tree/master/docs
+# All available actions: https://github.com/KrauseFx/fastlane/blob/master/docs/Actions.md
+# can also be listed using the `fastlane actions` command
+
+# Change the syntax highlighting to Ruby
+# All lines starting with a # are ignored when running `fastlane`
+
+# By default, fastlane will send which actions are used
+# No personal data is shared, more information on https://github.com/fastlane/enhancer
+# Uncomment the following line to opt out
+# opt_out_usage
+
+# If you want to automatically update fastlane if a new version is available:
+# update_fastlane
+
+# This is the minimum version number required.
+# Update this, if you use features of a newer version
+fastlane_version "1.39.0"
+
+default_platform :ios
+
+platform :ios do
+  before_all do
+    # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+  end
+
+  desc "Test: Clone a repo" 
+  lane :clone do
+    migrate_git_repository(from_repo_url: "git@gitlab.devsub.net:cocoapods/ivbase64.git", to_repo_url: "git@git.innovaptor.at:mexx/test.git")
+  end
+
+  desc "Lists all projects that"
+  lane :list_projects do
+    projects_src = gitlab_read(host: ENV["FL_GITLAB_ENDPOINT_SRC"], token: ENV["FL_GITLAB_TOKEN_SRC"])
+    projects_dst = gitlab_read(host: ENV["FL_GITLAB_ENDPOINT_DST"], token: ENV["FL_GITLAB_TOKEN_DST"])
+
+    Helper.log("Source Projects: #{projects_src}")
+    Helper.log("Destination Projects: #{projects_dst}")
+  end
+
+  # You can define as many lanes as you want
+
+  after_all do |lane|
+    # This block is called, only if the executed lane was successful
+    
+    # slack(
+    #   message: "Successfully deployed new App Update."
+    # )
+  end
+
+  error do |lane, exception|
+    # slack(
+    #   message: exception.message,
+    #   success: false
+    # )
+  end
+end
+
+
+# More information about multiple platforms in fastlane: https://github.com/KrauseFx/fastlane/blob/master/docs/Platforms.md
+# All available actions: https://github.com/KrauseFx/fastlane/blob/master/docs/Actions.md
