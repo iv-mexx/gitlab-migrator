@@ -16,7 +16,7 @@
 
 # This is the minimum version number required.
 # Update this, if you use features of a newer version
-fastlane_version "1.39.0"
+fastlane_version "1.40.0"
 
 default_platform :ios
 
@@ -65,7 +65,25 @@ platform :ios do
   end
 
   desc "Migrate a specific project"
-  lane :migrate do 
+  desc "Specify the project that should be migrated by its path (with namespace) via the project parameter"
+  desc "Example: fastlane migrate project:cocoapods/specs"
+  lane :migrate do |params|
+    project_path = params[:project] || prompt(text: "Please enter the path (including the namespace) of the project you want to migrate")
+    projects_src = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_SRC"], api_token: ENV["FL_GITLAB_TOKEN_SRC"]).select { |p| p.path_with_namespace == project_path }
+
+    Helper.log.info("Checking the source for existing project #{project_path}")
+    raise "Project with path #{project_path} not found in source #{ENV["FL_GITLAB_ENDPOINT_SRC"]}" unless projects_src.count == 1
+    project = projects_src.first
+    Helper.log.info("Checking the destination for existing project #{project_path}")
+    projects_dst = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_DST"], api_token: ENV["FL_GITLAB_TOKEN_DST"]).select { |p| p.path_with_namespace == project_path }
+    raise "Project with path #{project_path} already exists in destination #{ENV["FL_GITLAB_ENDPOINT_DST"]}" unless projects_dst.empty?
+
+    Helper.log.info("Checks OK, Starting to migrate project #{project_path} to #{ENV['FL_GITLAB_ENDPOINT_DST']}")
+    gitlab_create_project(
+      endpoint: ENV["FL_GITLAB_ENDPOINT_DST"], 
+      api_token: ENV["FL_GITLAB_TOKEN_DST"], 
+      project: project
+    )
 
   end
 
