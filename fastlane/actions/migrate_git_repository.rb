@@ -58,7 +58,7 @@ module Fastlane
 
       def self.authors
         # So no one will ever forget your contribution to fastlane :) You are awesome btw!
-        ["Markus Chmelar, @cs_mexx"]
+        ["cs_mexx"]
       end
 
       def self.is_supported?(platform)
