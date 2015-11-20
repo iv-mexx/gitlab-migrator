@@ -7,6 +7,13 @@ In order to access the gitlab instances, you'll need to provide their endpoint a
 For fastlane to be able to access those, you will need have to provide some information in the `.env` file. 
 This repo already contains a file named `env` at its root level. Enter the gitlab endpoints and API access-tokens there, remove the comments and change the filename to `.env`.
 
+#### Self-Signed SSH Certificates
+
+If you can not connect to your gitlab API because of problems with a self signed SSH Certificate, you can use this to disable certificate verification:
+
+```export GITLAB_API_HTTPARTY_OPTIONS="{verify: false}"```
+
+I've put this into my `~/.zshrc` (because I did not find out how else to set this ENV variable so that it still works in the context of fastlane)
 
 ### Whats being migrated
 

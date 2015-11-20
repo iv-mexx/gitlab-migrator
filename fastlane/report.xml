@@ -3,27 +3,27 @@
   <testsuite name="run">
     
       
-      <testcase name="0: Verifying required fastlane version" time="0.000366">
+      <testcase name="0: Verifying required fastlane version" time="0.000331">
         
       </testcase>
     
       
-      <testcase name="1: default_platform" time="0.000245">
+      <testcase name="1: default_platform" time="0.000363">
         
       </testcase>
     
       
-      <testcase name="2: gitlab_get_projects" time="2.423421">
+      <testcase name="2: gitlab_get_projects" time="2.301862">
         
       </testcase>
     
       
-      <testcase name="3: gitlab_get_projects" time="0.191746">
+      <testcase name="3: gitlab_get_projects" time="0.248019">
         
       </testcase>
     
       
-      <testcase name="4: gitlab_create_project" time="1.441749">
+      <testcase name="4: gitlab_create_project" time="84.213543">
         
       </testcase>
     
