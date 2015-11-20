@@ -37,8 +37,8 @@ bundle install
 
 In order to access the gitlab instances, you'll need to provide their endpoint and an API access-token.
 
-For fastlane to be able to access those, you will need have to provide some information in the `.env` file. 
-This repo already contains a file named `env` at its root level. Enter the gitlab endpoints and API access-tokens there, remove the comments and change the filename to `.env`.
+For fastlane to be able to access those, you will need have to provide some information in the `fastlane/.env` file. 
+This repo already contains a file named `fastlane/env`. Edit this file: enter the gitlab endpoints and API access-tokens there, remove the comments and change the filename to `fastlane/.env`.
 
 ### Self-Signed SSH Certificates
 
