@@ -1,8 +1,8 @@
 This tool is based on [fastlane](https://fastlane.tools), different actions are implemented in therms of `lanes`.
 
-### Usage
+## Usage
 
-#### List Projects
+### List Projects
 
 You can print a list of all projects on the source gitlab with this command:
 
@@ -13,7 +13,7 @@ fastlane list_projects
 This will also show projects that have already been migrated.
 **Attention:** Keep in mind that projects are matched by name, so if you have migrated a project already and changed its name, it will **not** show up as migrated!
 
-#### Migrate a Project
+### Migrate a Project
 
 You can migrate a specific project with this command:
 
@@ -25,14 +25,22 @@ The `project_path` is the full path to the project in gitlab (including the name
 
 As an example, `fastlane migrate project:mexx-uni/pue1` will migrate the project `pue1` in the `mexx-uni` group.
 
-### Setup
+## Setup
+
+First, install the dependencies via 
+
+```
+bundle install
+```
+
+### Github API Credentials
 
 In order to access the gitlab instances, you'll need to provide their endpoint and an API access-token.
 
 For fastlane to be able to access those, you will need have to provide some information in the `.env` file. 
 This repo already contains a file named `env` at its root level. Enter the gitlab endpoints and API access-tokens there, remove the comments and change the filename to `.env`.
 
-#### Self-Signed SSH Certificates
+### Self-Signed SSH Certificates
 
 If you can not connect to your gitlab API because of problems with a self signed SSH Certificate, you can use this to disable certificate verification:
 
@@ -40,9 +48,9 @@ If you can not connect to your gitlab API because of problems with a self signed
 
 I've put this into my `~/.zshrc` (because I did not find out how else to set this ENV variable so that it still works in the context of fastlane)
 
-### Whats being migrated
+## Whats being migrated
 
-#### Projects
+### Projects
 
 * description
 * default_branch
@@ -55,19 +63,19 @@ I've put this into my `~/.zshrc` (because I did not find out how else to set thi
 * merge_requests_enabled
 * public
 
-#### Labels
+### Labels
 
 * name
 * color
 
-#### Milestones
+### Milestones
 
 * project
 * title
 * description
 * due_date
 
-#### Issues
+### Issues
 
 * project
 * title
@@ -77,23 +85,23 @@ I've put this into my `~/.zshrc` (because I did not find out how else to set thi
 * labels
 * notes (see caveats)
 
-### Whats not being migrated
+## Whats not being migrated
 
 * Merge Requests + Notes
 * Snippets + Notes
 * System Hooks
 * Users
 
-#### Repositories
+### Repositories
 
 After creating the project in the new gitlab, the git repository from the original source will be cloned and pushed to the new gitlab project
 
 * all branches
 * all tags
 
-### Caveats
+## Caveats
 
-#### Groups
+### Groups
 
 * Projects will be created in the same Namespace and for the same Group as in the original Gitlab
 * Namespace and Group are matched by Name
@@ -101,11 +109,11 @@ After creating the project in the new gitlab, the git repository from the origin
 * Groups will be created when not yet existing, but Group-Members will **not** be populated!
   * Due to the aforementioned strange behavior of the Gitlab API, **only** a group will be created (namespace can not be created) and the `group_id` will also be used as `namespace_id` for the new project
 
-#### Issues
+### Issues
 
 * Issues are assigned to users on a 'best effort' basis. 
 
-#### Notes
+### Notes
 
 * All notes are posted in the name of the authenticated use who is performing the migration. It is not possible to change the author of a note. 
 * Notes are posted with a specific header that notes the original author and the original date of the note
