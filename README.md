@@ -30,6 +30,35 @@ I've put this into my `~/.zshrc` (because I did not find out how else to set thi
 * merge_requests_enabled
 * public
 
+#### Labels
+
+* name
+* color
+
+#### Milestones
+
+* project
+* title
+* description
+* due_date
+
+#### Issues
+
+* project
+* title
+* description
+* assignee (on a best effort base)
+* milestone
+* labels
+* notes (see caveats)
+
+### Whats not being migrated
+
+* Merge Requests + Notes
+* Snippets + Notes
+* System Hooks
+* Users
+
 #### Repositories
 
 After creating the project in the new gitlab, the git repository from the original source will be cloned and pushed to the new gitlab project
@@ -46,3 +75,14 @@ After creating the project in the new gitlab, the git repository from the origin
   * Gitlab API is a little bit strange: When creating a group, a `group_id` and `namespace_id` are required. Existing project only has a namespace, but namespace are not actuall entities in the gitlab API. It is assumed that group and namespace have a 1:1 relation and `group_id` = `namespace_id`, also name and path for groups and namespaces are always equal. 
 * Groups will be created when not yet existing, but Group-Members will **not** be populated!
   * Due to the aforementioned strange behavior of the Gitlab API, **only** a group will be created (namespace can not be created) and the `group_id` will also be used as `namespace_id` for the new project
+
+#### Issues
+
+* Issues are assigned to users on a 'best effort' basis. 
+
+#### Notes
+
+* All notes are posted in the name of the authenticated use who is performing the migration. It is not possible to change the author of a note. 
+* Notes are posted with a specific header that notes the original author and the original date of the note
+
+
