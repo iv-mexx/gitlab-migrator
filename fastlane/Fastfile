@@ -81,7 +81,7 @@ platform :ios do
     Helper.log.info("Checking the destination for existing project #{project_path}")
     projects_dst = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_DST"], api_token: ENV["FL_GITLAB_TOKEN_DST"]).select { |p| p.path_with_namespace == project_path }
     
-    if projects_dst.empty 
+    if projects_dst.empty?
       Helper.log.info("Checks OK, Starting to migrate project #{project_path} to #{ENV['FL_GITLAB_ENDPOINT_DST']}")
       new_project = gitlab_create_project(
         endpoint_src: ENV["FL_GITLAB_ENDPOINT_SRC"], 
