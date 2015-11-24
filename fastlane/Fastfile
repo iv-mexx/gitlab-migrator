@@ -80,16 +80,23 @@ platform :ios do
     project = projects_src.first
     Helper.log.info("Checking the destination for existing project #{project_path}")
     projects_dst = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_DST"], api_token: ENV["FL_GITLAB_TOKEN_DST"]).select { |p| p.path_with_namespace == project_path }
-    raise "Project with path #{project_path} already exists in destination #{ENV["FL_GITLAB_ENDPOINT_DST"]}" unless projects_dst.empty?
-
-    Helper.log.info("Checks OK, Starting to migrate project #{project_path} to #{ENV['FL_GITLAB_ENDPOINT_DST']}")
-    new_project = gitlab_create_project(
-      endpoint_src: ENV["FL_GITLAB_ENDPOINT_SRC"], 
-      api_token_src: ENV["FL_GITLAB_TOKEN_SRC"], 
-      endpoint_dst: ENV["FL_GITLAB_ENDPOINT_DST"], 
-      api_token_dst: ENV["FL_GITLAB_TOKEN_DST"], 
-      project: project
-    )
+    
+    if projects_dst.empty 
+      Helper.log.info("Checks OK, Starting to migrate project #{project_path} to #{ENV['FL_GITLAB_ENDPOINT_DST']}")
+      new_project = gitlab_create_project(
+        endpoint_src: ENV["FL_GITLAB_ENDPOINT_SRC"], 
+        api_token_src: ENV["FL_GITLAB_TOKEN_SRC"], 
+        endpoint_dst: ENV["FL_GITLAB_ENDPOINT_DST"], 
+        api_token_dst: ENV["FL_GITLAB_TOKEN_DST"], 
+        project: project
+      )
+    elsif projects_dst.count == 1
+      new_project = projects_dst.first
+      Helper.log.info("Project exists already, only migrating the repository")
+    else 
+      Helper.log.error("Several potential target projects exist: #{projects_dst}")
+      raise "Several potential target projects exist, dont know which one to pick"
+    end
 
     Helper.log.info("Gitlab project has been migrated, now migrate the repository")
     migrate_git_repository(from_repo_url: project.ssh_url_to_repo, to_repo_url: new_project.ssh_url_to_repo)

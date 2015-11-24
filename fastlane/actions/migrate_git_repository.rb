@@ -11,6 +11,7 @@ module Fastlane
           Actions.sh("git clone #{params[:from_repo_url]} #{tmpdir}")
           Dir.chdir(tmpdir) do
             Actions.sh("git remote add newOrigin #{params[:to_repo_url]}")
+            Actions.sh("for remote in `git branch -r | grep -v master `; do git checkout --track $remote ; done")
             Helper.log.info "Pushing all branches and tags to #{params[:to_repo_url]}"          
             Actions.sh("git push newOrigin --all")
             Actions.sh("git push newOrigin --tags")
