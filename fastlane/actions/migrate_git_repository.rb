@@ -6,14 +6,15 @@ module Fastlane
     require 'fileutils'
     class MigrateGitRepositoryAction < Action
       def self.run(params)
-        Dir.mktmpdir do |dir|
-          Helper.log.info "Cloning Repository from #{params[:from_repo_url]} into #{dir}"
-          Actions.sh("git clone #{params[:from_repo_url]} #{dir}")
-          Actions.sh("cd #{dir} && pwd")
-          Actions.sh("cd #{dir} && git remote add newOrigin #{params[:to_repo_url]}")
-          Helper.log.info "Pushing all branches and tags to #{params[:to_repo_url]}"          
-          Actions.sh("cd #{dir} && git push newOrigin --all")
-          Actions.sh("cd #{dir} && git push newOrigin --tags")
+        Dir.mktmpdir do |tmpdir|
+          Helper.log.info "Cloning Repository from #{params[:from_repo_url]} into #{tmpdir}"
+          Actions.sh("git clone #{params[:from_repo_url]} #{tmpdir}")
+          Dir.chdir(tmpdir) do
+            Actions.sh("git remote add newOrigin #{params[:to_repo_url]}")
+            Helper.log.info "Pushing all branches and tags to #{params[:to_repo_url]}"          
+            Actions.sh("git push newOrigin --all")
+            Actions.sh("git push newOrigin --tags")
+          end
         end
       end
 
