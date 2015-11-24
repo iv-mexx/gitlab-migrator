@@ -12,8 +12,11 @@ module Fastlane
         original_project = params[:project]
         Helper.log.info "Creating Project: #{original_project.path_with_namespace}"
 
+        # Estimate User-Mapping
+        user_mapping = map_users(source, destination)
+
         # Check if the Group and Namespace for the Project exist already
-        group = ensure_group(destination, original_project.namespace.name, original_project.namespace.path)
+        group = ensure_group(source, destination, original_project.namespace, user_mapping)
 
         # Create the project
         new_project = destination.create_project(original_project.name,
@@ -31,9 +34,6 @@ module Fastlane
 
         Helper.log.info("New Project created with ID: #{new_project.id} -  #{new_project}")
 
-        # Estimate User-Mapping
-        user_mapping = map_users(source, destination)
-
         # Create Labels
         migrate_labels(source, destination, original_project, new_project)
 
@@ -50,14 +50,21 @@ module Fastlane
       # checks if a group with the same path-name exists in the destination gitlab.
       # If necessary, a group with that path-name is created
       # The group (in the destination gitlab) is returned
-      def self.ensure_group(client, group_name, group_path)
-        Helper.log.info("Searching for group with name '#{group_name}' and path: '#{group_path}'")
-        group = read_groups(client).select { |g| g.path == group_path}.first
+      def self.ensure_group(gitlab_src, gitlab_dst, namespace, user_mapping)
+        Helper.log.info("Searching for group with name '#{namespace.name}' and path: '#{namespace.path}'")
+        group = read_groups(gitlab_dst).select { |g| g.path == namespace.path}.first
         if group
           Helper.log.info("Existing group '#{group.name}' found")
         else
-          Helper.log.info("Group '#{group_name}' does not yet exist, will be created now")
-          group = client.create_group(group_name, group_path)
+          Helper.log.info("Group '#{namespace.name}' does not yet exist, will be created now")
+          group = gitlab_dst.create_group(namespace.name, namespace.path)
+          # Populate group with users
+          # Keep in mind: User-Mapping is estimated and not garuanteed. Users have to exist in the new gitlab 
+          # before migrating projects and their name or username has to match their name/username in the old gitlab
+          original_group = gitlab_src.group(namespace.id)
+          read_group_members(gitlab_src, original_group).each do |user|
+            gitlab_dst.add_group_member(group.id, user_mapping[user.id], user.access_level) if user_mapping[user.id]
+          end
         end
         group
       end
@@ -161,6 +168,12 @@ module Fastlane
       def self.read_users(client)
         read_paginated_resource do |page, page_size|
           client.users(per_page: page_size, page: page)
+        end
+      end
+
+      def self.read_group_members(client, group)
+        read_paginated_resource do |page, page_size|
+          client.group_members(group.id, per_page: page_size, page: page)
         end
       end
 
