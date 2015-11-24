@@ -35,10 +35,12 @@ platform :ios do
     Helper.log.info "#{projects_src.count} projects Projecst read from the source"
     Helper.log.info "#{projects_dst.count} projects Projecst read from the destination"
 
-    project_paths_dst = projects_dst.map { |p| p.path }
+    project_paths_dst = projects_dst.map { |p| p.path.downcase }
+    project_paths_src = projects_src.map { |p| p.path.downcase }
 
-    projects_not_migrated = projects_src.select { |p| !project_paths_dst.include? p.path }
-    projects_already_migrated = projects_src.select { |p| project_paths_dst.include? p.path }
+    projects_not_migrated = projects_src.select { |p| !project_paths_dst.include? p.path.downcase }
+    projects_already_migrated = projects_src.select { |p| project_paths_dst.include? p.path.downcase }
+    projects_not_in_src = projects_dst.select { |p| !project_paths_src.include? p.path.downcase }
 
     if projects_not_migrated.empty?
       puts "All projects have already been migrated"
@@ -57,6 +59,13 @@ platform :ios do
         puts "\t✅  #{p.path_with_namespace}"
       end
     end 
+
+    if not projects_not_in_src.empty?
+      puts "There are new projects that exist not in the original gitlab instance"
+      projects_not_in_src.each do |p|
+        puts "\t🏳  #{p.path_with_namespace}"
+      end
+    end
   end
 
   desc "Migrate a specific project"
