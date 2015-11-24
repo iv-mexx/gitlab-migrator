@@ -153,78 +153,49 @@ module Fastlane
       # Read Paginated Resources completely
       #
       def self.read_groups(client)
-        groups = []
-        page = 1
-        page_size = 20
-        while true
-          groups_page = client.groups(per_page: page_size, page: page)
-          page += 1 
-          groups += groups_page
-          if groups_page.count < page_size
-            break
-          end
+        read_paginated_resource do |page, page_size|
+          client.groups(per_page: page_size, page: page)
         end
-        groups
       end
 
       def self.read_users(client)
-        users = []
-        page = 1
-        page_size = 20
-        while true
-          users_page = client.users(per_page: page_size, page: page)
-          page += 1 
-          users += users_page
-          if users_page.count < page_size
-            break
-          end
+        read_paginated_resource do |page, page_size|
+          client.users(per_page: page_size, page: page)
         end
-        users
       end
 
       def self.read_milestones(client, project) 
-        milestones = []
-        page = 1
-        page_size = 20
-        while true
-          milestones_page = client.milestones(project.id, per_page: page_size, page: page)
-          page += 1
-          milestones += milestones_page
-          if milestones_page.count < page_size
-            break
-          end
+        read_paginated_resource do |page, page_size|
+          client.milestones(project.id, per_page: page_size, page: page)
         end
-        milestones.sort { |a, b| a.id <=> b.id }
       end
 
       def self.read_issues(client, project) 
-        issues = []
-        page = 1
-        page_size = 20
-        while true
-          issues_page = client.issues(project.id, per_page: page_size, page: page)
-          page += 1
-          issues += issues_page
-          if issues_page.count < page_size
-            break
-          end
+        read_paginated_resource do |page, page_size|
+          client.issues(project.id, per_page: page_size, page: page)
         end
-        issues.sort { |a, b| a.id <=> b.id }
       end
 
       def self.read_issue_notes(client, project, issue)
-        notes = []
+        read_paginated_resource do |page, page_size|
+          client.issue_notes(project.id, issue.id, per_page: page_size, page: page)
+        end
+      end
+
+      # Helper to read all pages of a paginated resource
+      def self.read_paginated_resource(&block)
+        resources = []
         page = 1
         page_size = 20
-        while true
-          notes_page = client.issue_notes(project.id, issue.id, per_page: page_size, page: page)
+        while true 
+          resources_page = yield(page, page_size)
           page += 1
-          notes += notes_page
-          if notes_page.count < page_size
+          resources += resources_page
+          if resources_page.count < page_size
             break
           end
         end
-        notes.sort { |a, b| a.id <=> b.id }
+        resources.sort { |a, b| a.id <=> b.id}
       end
 
       #####################################################
