@@ -8,7 +8,7 @@ This tool is here to help you migrate projects from one private gitlab instance 
 
 ## Usage
 
-This tool is based on [fastlane](https://fastlane.tools), different actions are implemented in therms of `lanes`.
+This tool is based on [fastlane](https://fastlane.tools), different actions are implemented in terms of `lanes`.
 
 ### List Projects
 
