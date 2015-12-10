@@ -36,7 +36,7 @@ As an example, `fastlane migrate project:mexx-uni/pue1` will migrate the project
 
 ## Setup
 
-First, install the dependencies via 
+The setup is as simple as running
 
 ```
 bundle install
