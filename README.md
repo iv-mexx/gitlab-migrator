@@ -1,6 +1,14 @@
-This tool is based on [fastlane](https://fastlane.tools), different actions are implemented in therms of `lanes`.
+🤘 Migrate your private [gitlab](https://about.gitlab.com) projects 🤘
+
+When using a private Gitlab instance, you can easily [import gitlab projects hosted on gitlab.com](http://doc.gitlab.com/ce/workflow/importing/import_projects_from_gitlab_com.html#project-importing-from-gitlab.com-to-your-private-gitlab-instance).
+
+However, if you are already using a private gitlab instance you [are out of luck](http://feedback.gitlab.com/forums/176466-general/suggestions/4488044-add-import-export-functionality-for-projects?page=1&per_page=20)
+
+This tool is here to help you migrate projects from one private gitlab instance to another. 
 
 ## Usage
+
+This tool is based on [fastlane](https://fastlane.tools), different actions are implemented in therms of `lanes`.
 
 ### List Projects
 
@@ -11,6 +19,7 @@ fastlane list_projects
 ```` 
 
 This will also show projects that have already been migrated.
+
 **Attention:** Keep in mind that projects are matched by name, so if you have migrated a project already and changed its name, it will **not** show up as migrated!
 
 ### Migrate a Project
@@ -31,6 +40,22 @@ First, install the dependencies via
 
 ```
 bundle install
+```
+
+### Migrating several projects
+
+If you need to migrate several projects at once, you can just create a small bash script that calls this tool for every project that should be migrated. 
+
+```
+#!/bin/bash
+
+setopt shwordsplit
+PI="namespace/project2 namespace/project2"
+
+for i in $PI; do
+	echo "Migrate Project: $i"
+	fastlane migrate project:$i
+done
 ```
 
 ### Github API Credentials
@@ -101,17 +126,27 @@ After creating the project in the new gitlab, the git repository from the origin
 
 ## Caveats
 
+### Users
+
+Users are not created in the target instance. Where users are necessary (e.g. as group members or issue assignees), existing users are matched by name. It is thus recommended to first create users in the new gitlab instance manually with the same name as in the original gitlab instance.
+
+For users to be matched sucessfully, one of those has to be the same in both githab instances
+
+* `name`
+* `username`
+
 ### Groups
 
 * Projects will be created in the same Namespace and for the same Group as in the original Gitlab
 * Namespace and Group are matched by Name
   * Gitlab API is a little bit strange: When creating a group, a `group_id` and `namespace_id` are required. Existing project only has a namespace, but namespace are not actuall entities in the gitlab API. It is assumed that group and namespace have a 1:1 relation and `group_id` = `namespace_id`, also name and path for groups and namespaces are always equal. 
-* Groups will be created when not yet existing, but Group-Members will **not** be populated!
+* Groups will be created when not yet existing
+  * Groups will be populated with users on a 'best effort' basis (matched by name).
   * Due to the aforementioned strange behavior of the Gitlab API, **only** a group will be created (namespace can not be created) and the `group_id` will also be used as `namespace_id` for the new project
 
 ### Issues
 
-* Issues are assigned to users on a 'best effort' basis. 
+* Issues are assigned to users on a 'best effort' (matched by name). 
 
 ### Notes
 
