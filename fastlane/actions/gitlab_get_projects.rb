@@ -8,19 +8,7 @@ module Fastlane
     class GitlabGetProjectsAction < Action
       def self.run(params)
         client = Gitlab.client(endpoint: params[:endpoint], private_token: params[:api_token])
-
-        projects = []
-        page = 1
-        page_size = 20
-        while true
-          projects_page = client.projects(per_page: page_size, page: page)
-          page += 1 
-          projects += projects_page
-          if projects_page.count < page_size
-            break
-          end
-        end
-        projects
+        client.projects.auto_paginate
       end
 
       #####################################################
