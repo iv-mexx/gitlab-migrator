@@ -100,6 +100,11 @@ platform :ios do
 
     Helper.log.info("Gitlab project has been migrated, now migrate the repository")
     migrate_git_repository(from_repo_url: project.ssh_url_to_repo, to_repo_url: new_project.ssh_url_to_repo)
+
+    if project.wiki_enabled
+      Helper.log.info("Migrating wiki-repository")
+      migrate_git_repository(from_repo_url: project.ssh_url_to_repo.gsub('.git', '.wiki.git'), to_repo_url: new_project.ssh_url_to_repo.gsub('.git', '.wiki.git'))
+    end
   end
 
   # You can define as many lanes as you want
