@@ -36,7 +36,15 @@ As an example, `fastlane migrate project:mexx-uni/pue1` will migrate the project
 
 ## Setup
 
-The setup is as simple as running
+All necessary dependencies can be installed via [bundler](http://bundler.io). 
+
+To install bundler, run
+
+```
+gem install bundler
+```
+
+To install the dependencies via bundler, run
 
 ```
 bundle install
