@@ -15,7 +15,7 @@ This tool is based on [fastlane](https://fastlane.tools), different actions are 
 You can print a list of all projects on the source gitlab with this command:
 
 ```
-fastlane list_projects
+bundle exec fastlane list_projects
 ```` 
 
 This will also show projects that have already been migrated.
@@ -27,7 +27,7 @@ This will also show projects that have already been migrated.
 You can migrate a specific project with this command:
 
 ```
-fastlane migrate project:<project_path>
+bundle exec fastlane migrate project:<project_path>
 ```
 
 The `project_path` is the full path to the project in gitlab (including the namespace), you can take the a path as printed in the `list_projects` action. 
@@ -54,7 +54,7 @@ PI="namespace/project2 namespace/project2"
 
 for i in $PI; do
 	echo "Migrate Project: $i"
-	fastlane migrate project:$i
+	bundle exec fastlane migrate project:$i
 done
 ```
 
