@@ -95,6 +95,7 @@ I've put this into my `~/.zshrc` (because I did not find out how else to set thi
 * group
 * namespace
 * wiki_enabled
+* wiki (if enabled)
 * wall_enabled
 * issues_enabled
 * snippets_enabled
