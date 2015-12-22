@@ -52,7 +52,7 @@ module Fastlane
       # The group (in the destination gitlab) is returned
       def self.ensure_group(gitlab_src, gitlab_dst, namespace, user_mapping)
         Helper.log.info("Searching for group with name '#{namespace.name}' and path: '#{namespace.path}'")
-        group = read_groups(gitlab_dst).select { |g| g.path == namespace.path}.first
+        group = gitlab_dst.groups.auto_paginate.select { |g| g.path == namespace.path}.first
         if group
           Helper.log.info("Existing group '#{group.name}' found")
         else
@@ -62,7 +62,7 @@ module Fastlane
           # Keep in mind: User-Mapping is estimated and not garuanteed. Users have to exist in the new gitlab 
           # before migrating projects and their name or username has to match their name/username in the old gitlab
           original_group = gitlab_src.group(namespace.id)
-          read_group_members(gitlab_src, original_group).each do |user|
+          gitlab_src.group_members(original_group.id).auto_paginate do |user|
             gitlab_dst.add_group_member(group.id, user_mapping[user.id], user.access_level) if user_mapping[user.id]
           end
         end
@@ -72,8 +72,8 @@ module Fastlane
       # Reads all users from the source gitlab and sees if there is an existing user (with the same name)
       # in the new gitlab. If so, an entrie to map the old id to the new id is inserted into the user map
       def self.map_users(gitlab_src, gitlab_dst)
-        users_src = read_users(gitlab_src)
-        users_dst = read_users(gitlab_dst)
+        users_src = gitlab_src.users.auto_paginate
+        users_dst = gitlab_dst.users.auto_paginate
 
         user_map = {}
         users_src.each do |user|
@@ -92,9 +92,7 @@ module Fastlane
       # Labels are later referenced by name, so we dont need to return an ID-Mapping
       def self.migrate_labels(gitlab_src, gitlab_dst, project_src, project_dst)
         Helper.log.info("Creating Labels")
-        labels = gitlab_src.labels(project_src.id)
-
-        labels.each do |label| 
+        labels = gitlab_src.labels(project_src.id).auto_paginate.each do |label|
           gitlab_dst.create_label(project_dst.id, label.name, label.color)
         end
         Helper.log.info("Labels created")
@@ -105,7 +103,7 @@ module Fastlane
       def self.migrate_milestones(gitlab_src, gitlab_dst, project_src, project_dst) 
         Helper.log.info("Migrating Milestones")
         milestone_map = {}
-        read_milestones(gitlab_src, project_src).each do |milestone|
+        gitlab_src.milestones(project_src.id).auto_paginate.sort { |m1, m2| m1.id <=> m2.id }.each do |milestone|
           new_milestone = gitlab_dst.create_milestone(project_dst.id, 
             milestone.title,
             description: milestone.description,
@@ -126,8 +124,7 @@ module Fastlane
         Helper.log.info("Usermap: #{usermap}")
         Helper.log.info("Milestonemap: #{milestonemap}")
 
-        read_issues(gitlab_src, project_src).each do |issue|
-
+        gitlab_src.issues(project_src.id).auto_paginate.sort { |i1, i2| i1.id <=> i2.id }.each do |issue|
           assignee_id = usermap[issue.assignee.id] if issue.assignee
           milestone_id = milestonemap[issue.milestone.id] if issue.milestone
           new_issue = gitlab_dst.create_issue(project_dst.id, 
@@ -149,66 +146,11 @@ module Fastlane
 
       def self.migrate_issue_notes(gitlab_src, gitlab_dst, project_src, project_dst, issue_src, issue_dst, usermap)
         Helper.log.info("Migrating issue notes for issue #{issue_src.id}")
-        read_issue_notes(gitlab_src, project_src, issue_src).each do |note|
+        gitlab_src.issue_notes(project_src.id, issue_src.id).auto_paginate.sort { |n1, n2| n1.id <=> n2.id }.each  do |note|
           body = "_Original comment by #{note.author.username} on #{Time.parse(note.created_at).strftime("%d %b %Y, %H:%M")}_\n\n---\n\n#{note.body}"
           gitlab_dst.create_issue_note(project_dst.id, issue_dst.id, body)
         end
         Helper.log.info("Migrated issue notes for issue #{issue_src.id}")
-      end
-
-      #
-      # Read Paginated Resources completely
-      #
-      def self.read_groups(client)
-        read_paginated_resource do |page, page_size|
-          client.groups(per_page: page_size, page: page)
-        end
-      end
-
-      def self.read_users(client)
-        read_paginated_resource do |page, page_size|
-          client.users(per_page: page_size, page: page)
-        end
-      end
-
-      def self.read_group_members(client, group)
-        read_paginated_resource do |page, page_size|
-          client.group_members(group.id, per_page: page_size, page: page)
-        end
-      end
-
-      def self.read_milestones(client, project) 
-        read_paginated_resource do |page, page_size|
-          client.milestones(project.id, per_page: page_size, page: page)
-        end
-      end
-
-      def self.read_issues(client, project) 
-        read_paginated_resource do |page, page_size|
-          client.issues(project.id, per_page: page_size, page: page)
-        end
-      end
-
-      def self.read_issue_notes(client, project, issue)
-        read_paginated_resource do |page, page_size|
-          client.issue_notes(project.id, issue.id, per_page: page_size, page: page)
-        end
-      end
-
-      # Helper to read all pages of a paginated resource
-      def self.read_paginated_resource(&block)
-        resources = []
-        page = 1
-        page_size = 20
-        while true 
-          resources_page = yield(page, page_size)
-          page += 1
-          resources += resources_page
-          if resources_page.count < page_size
-            break
-          end
-        end
-        resources.sort { |a, b| a.id <=> b.id}
       end
 
       #####################################################
