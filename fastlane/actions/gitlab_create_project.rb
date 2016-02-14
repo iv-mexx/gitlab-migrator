@@ -169,28 +169,28 @@ module Fastlane
         # Define all options your action supports.
         [
           FastlaneCore::ConfigItem.new(key: :endpoint_src,
-                                       env_name: "FL_GITLAB_CREATE_PROJECT_ENDPOINT_SRC",
+                                       env_name: "FL_GITLAB_ENDPOINT_SRC",
                                        description: "Source Endpoint for GitlabeCreateProjectAction",
                                        is_string: true,
                                        verify_block: proc do |value|
                                           raise "No Source Endpoint for GitlabeCreateProjectAction given, pass using `endpoint_src: 'url'`".red unless (value and not value.empty?)
                                        end),
           FastlaneCore::ConfigItem.new(key: :api_token_src,
-                                       env_name: "FL_GITLAB_CREATE_PROJECT_API_TOKEN_SRC",
+                                       env_name: "FL_GITLAB_TOKEN_SRC",
                                        description: "Source API-Token for GitlabeCreateProjectAction",
                                        is_string: true,
                                        verify_block: proc do |value|
                                           raise "No Source API-Token for GitlabeCreateProjectAction given, pass using `api_token_src: 'token'`".red unless (value and not value.empty?)
                                        end),
           FastlaneCore::ConfigItem.new(key: :endpoint_dst,
-                                       env_name: "FL_GITLAB_CREATE_PROJECT_ENDPOINT_DST",
+                                       env_name: "FL_GITLAB_ENDPOINT_DST",
                                        description: "Destination Endpoint for GitlabeCreateProjectAction",
                                        is_string: true,
                                        verify_block: proc do |value|
                                           raise "No Destination Endpoint for GitlabeCreateProjectAction given, pass using `endpoint_dst: 'url'`".red unless (value and not value.empty?)
                                        end),
           FastlaneCore::ConfigItem.new(key: :api_token_dst,
-                                       env_name: "FL_GITLAB_CREATE_PROJECT_API_TOKEN_DST",
+                                       env_name: "FL_GITLAB_TOKEN_DST",
                                        description: "Destination API-Token for GitlabeCreateProjectAction",
                                        is_string: true,
                                        verify_block: proc do |value|

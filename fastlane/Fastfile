@@ -84,10 +84,6 @@ platform :ios do
     if projects_dst.empty?
       Helper.log.info("Checks OK, Starting to migrate project #{project_path} to #{ENV['FL_GITLAB_ENDPOINT_DST']}")
       new_project = gitlab_create_project(
-        endpoint_src: ENV["FL_GITLAB_ENDPOINT_SRC"], 
-        api_token_src: ENV["FL_GITLAB_TOKEN_SRC"], 
-        endpoint_dst: ENV["FL_GITLAB_ENDPOINT_DST"], 
-        api_token_dst: ENV["FL_GITLAB_TOKEN_DST"], 
         project: project
       )
     elsif projects_dst.count == 1
