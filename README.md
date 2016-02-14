@@ -101,6 +101,7 @@ I've put this into my `~/.zshrc` (because I did not find out how else to set thi
 * snippets_enabled
 * merge_requests_enabled
 * public
+* deploy keys
 
 ### Labels
 
