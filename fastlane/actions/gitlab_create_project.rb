@@ -34,6 +34,9 @@ module Fastlane
 
         Helper.log.info("New Project created with ID: #{new_project.id} -  #{new_project}")
 
+        # Create Deploy Keys
+        migrate_deploy_keys(source, destination, original_project, new_project)
+
         # Create Labels
         migrate_labels(source, destination, original_project, new_project)
 
@@ -96,6 +99,15 @@ module Fastlane
           gitlab_dst.create_label(project_dst.id, label.name, label.color)
         end
         Helper.log.info("Labels created")
+      end
+
+      # Reads all deploy-keys from the source project and create them in the destination project
+      def self.migrate_deploy_keys(gitlab_src, gitlab_dst, project_src, project_dst)
+        Helper.log.info("Creating Deploy-Keys")
+        labels = gitlab_src.deploy_keys(project_src.id).auto_paginate.each do |key|
+          gitlab_dst.create_deploy_key(project_dst.id, key.title, key.key)
+        end
+        Helper.log.info("Deploy-Keys created")
       end
 
       # Reads all milestones from the source project and create them in the destination project
