@@ -78,6 +78,12 @@ Two pieces of information are necessary for each gitlab instance:
 * `FL_GITLAB_ENDPOINT_SRC` / `FL_GITLAB_ENDPOINT_DST`: API endpoint URL, e.g. `https://example.net/api/v3`
 * `FL_GITLAB_TOKEN_SRC` / `FL_GITLAB_TOKEN_DST`: User's private token or OAuth2 access token. [How to get your private token](https://www.safaribooksonline.com/library/view/gitlab-cookbook/9781783986842/ch06s05.html)
 
+### Git Protocol
+
+Optionaly you can choose the protocol to access the git repo (clone, push, etc). Default is ssh.
+* `FL_GIT_PROTOCOL_SRC` / `FL_GIT_PROTOCOL_DST`: GIT Protocol, e.g. `ssh`
+
+
 ### Self-Signed SSH Certificates
 
 If you can not connect to your gitlab API because of problems with a self signed SSH Certificate, you can use this to disable certificate verification:

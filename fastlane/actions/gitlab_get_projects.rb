@@ -26,8 +26,8 @@ module Fastlane
       end
 
       def self.available_options
-        # Define all options your action supports. 
-        
+        # Define all options your action supports.
+
         # Below a few examples
         [
           FastlaneCore::ConfigItem.new(key: :endpoint,
