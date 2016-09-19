@@ -89,8 +89,8 @@ GEM
       fastimage (~> 1.6.3)
       fastlane_core (>= 0.16.0, < 1.0.0)
       mini_magick (~> 4.0.2)
-    gitlab (3.6.1)
-      httparty
+    gitlab (3.7.0)
+      httparty (~> 0.13.0)
       terminal-table
     google-api-client (0.8.6)
       activesupport (>= 3.2)
@@ -247,4 +247,4 @@ DEPENDENCIES
   gitlab
 
 BUNDLED WITH
-   1.10.6
+   1.12.5
