@@ -3,5 +3,8 @@
 // TODO: Remove this notice and make sure that you dont commit `.env` to keep your tokens save
 FL_GITLAB_ENDPOINT_SRC=http://gitlab.source.com/api/v3
 FL_GITLAB_TOKEN_SRC=<PRIVATE-TOKEN-FOR-SOURCE>
+FL_GIT_PROTOCOL_SRC=<https-or-ssh (defaults to ssh)>
+
 FL_GITLAB_ENDPOINT_DST=http://gitlab.destination.com/api/v3
 FL_GITLAB_TOKEN_DST=<PRIVATE-TOKEN-FOR-DESTINATION>
+FL_GIT_PROTOCOL_DST=<https-or-ssh (defaults to ssh)>
