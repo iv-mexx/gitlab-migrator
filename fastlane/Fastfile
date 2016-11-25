@@ -32,8 +32,8 @@ platform :ios do
     projects_src = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_SRC"], api_token: ENV["FL_GITLAB_TOKEN_SRC"]).sort { |a, b| a.path_with_namespace <=> b.path_with_namespace }
     projects_dst = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_DST"], api_token: ENV["FL_GITLAB_TOKEN_DST"]).sort { |a, b| a.path_with_namespace <=> b.path_with_namespace }
 
-    Helper.log.info "#{projects_src.count} projects Projecst read from the source"
-    Helper.log.info "#{projects_dst.count} projects Projecst read from the destination"
+    UI.message ("#{projects_src.count} projects Projecst read from the source")
+    UI.message ("#{projects_dst.count} projects Projecst read from the destination")
 
     project_paths_dst = projects_dst.map { |p| p.path.downcase }
     project_paths_src = projects_src.map { |p| p.path.downcase }
@@ -75,14 +75,14 @@ platform :ios do
     project_path = params[:project] || prompt(text: "Please enter the path (including the namespace) of the project you want to migrate")
     projects_src = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_SRC"], api_token: ENV["FL_GITLAB_TOKEN_SRC"]).select { |p| p.path_with_namespace == project_path }
 
-    Helper.log.info("Checking the source for existing project #{project_path}")
+    UI.message("Checking the source for existing project #{project_path}")
     raise "Project with path #{project_path} not found in source #{ENV["FL_GITLAB_ENDPOINT_SRC"]}" unless projects_src.count == 1
     project = projects_src.first
-    Helper.log.info("Checking the destination for existing project #{project_path}")
+    UI.message("Checking the destination for existing project #{project_path}")
     projects_dst = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_DST"], api_token: ENV["FL_GITLAB_TOKEN_DST"]).select { |p| p.path_with_namespace == project_path }
     
     if projects_dst.empty?
-      Helper.log.info("Checks OK, Starting to migrate project #{project_path} to #{ENV['FL_GITLAB_ENDPOINT_DST']}")
+      UI.message("Checks OK, Starting to migrate project #{project_path} to #{ENV['FL_GITLAB_ENDPOINT_DST']}")
       new_project = gitlab_create_project(
         endpoint_src: ENV["FL_GITLAB_ENDPOINT_SRC"], 
         api_token_src: ENV["FL_GITLAB_TOKEN_SRC"], 
@@ -92,13 +92,13 @@ platform :ios do
       )
     elsif projects_dst.count == 1
       new_project = projects_dst.first
-      Helper.log.info("Project exists already, only migrating the repository")
+      UI.important("Project exists already, only migrating the repository")
     else 
-      Helper.log.error("Several potential target projects exist: #{projects_dst}")
+      UI.error("Several potential target projects exist: #{projects_dst}")
       raise "Several potential target projects exist, dont know which one to pick"
     end
 
-    Helper.log.info("Gitlab project has been migrated, now migrate the repository")
+    UI.message("Gitlab project has been migrated, now migrate the repository")
     migrate_git_repository(from_repo_url: project.ssh_url_to_repo, to_repo_url: new_project.ssh_url_to_repo)
   end
 

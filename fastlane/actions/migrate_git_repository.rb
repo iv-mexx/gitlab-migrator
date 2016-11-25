@@ -7,13 +7,13 @@ module Fastlane
     class MigrateGitRepositoryAction < Action
       def self.run(params)
         Dir.mktmpdir do |tmpdir|
-          Helper.log.info "Cloning Repository from #{params[:from_repo_url]} into #{tmpdir}"
+          UI.message ("Cloning Repository from #{params[:from_repo_url]} into #{tmpdir}")
           Actions.sh("git clone #{params[:from_repo_url]} #{tmpdir}")
           Dir.chdir(tmpdir) do
             Actions.sh("git remote add newOrigin #{params[:to_repo_url]}")
             default_branch = Actions.sh("git rev-parse --abbrev-ref HEAD")
             Actions.sh("for remote in `git branch -r | grep -v #{default_branch} `; do git checkout --track $remote ; done")
-            Helper.log.info "Pushing all branches and tags to #{params[:to_repo_url]}"          
+            UI.message ("Pushing all branches and tags to #{params[:to_repo_url]}")
             Actions.sh("git push newOrigin --all")
             Actions.sh("git push newOrigin --tags")
           end

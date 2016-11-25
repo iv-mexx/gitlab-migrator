@@ -10,7 +10,7 @@ module Fastlane
         source = Gitlab.client(endpoint: params[:endpoint_src], private_token: params[:api_token_src])
         destination = Gitlab.client(endpoint: params[:endpoint_dst], private_token: params[:api_token_dst])
         original_project = params[:project]
-        Helper.log.info "Creating Project: #{original_project.path_with_namespace}"
+        UI.message ("Creating Project: #{original_project.path_with_namespace}")
 
         # Estimate User-Mapping
         user_mapping = map_users(source, destination)
@@ -32,7 +32,7 @@ module Fastlane
           public: original_project.public
         )
 
-        Helper.log.info("New Project created with ID: #{new_project.id} -  #{new_project}")
+        UI.message("New Project created with ID: #{new_project.id} -  #{new_project}")
 
         # Create Labels
         migrate_labels(source, destination, original_project, new_project)
@@ -51,12 +51,12 @@ module Fastlane
       # If necessary, a group with that path-name is created
       # The group (in the destination gitlab) is returned
       def self.ensure_group(gitlab_src, gitlab_dst, namespace, user_mapping)
-        Helper.log.info("Searching for group with name '#{namespace.name}' and path: '#{namespace.path}'")
+        UI.message("Searching for group with name '#{namespace.name}' and path: '#{namespace.path}'")
         group = read_groups(gitlab_dst).select { |g| g.path == namespace.path}.first
         if group
-          Helper.log.info("Existing group '#{group.name}' found")
+          UI.message("Existing group '#{group.name}' found")
         else
-          Helper.log.info("Group '#{namespace.name}' does not yet exist, will be created now")
+          UI.message("Group '#{namespace.name}' does not yet exist, will be created now")
           group = gitlab_dst.create_group(namespace.name, namespace.path)
           # Populate group with users
           # Keep in mind: User-Mapping is estimated and not garuanteed. Users have to exist in the new gitlab 
@@ -80,30 +80,30 @@ module Fastlane
           users = users_dst.select { |u| u.username == user.username or u.name == user.name}
           if users.count == 1
             # Only map users that are unambiguously the same. If there are several matches, dont match them
-            Helper.log.info("Mapping user #{user.username} to #{users.first.username}: #{user.id}=#{users.first.id}")
+            UI.message("Mapping user #{user.username} to #{users.first.username}: #{user.id}=#{users.first.id}")
             user_map[user.id] = users.first.id
           end
         end
-        Helper.log.info("User Mapping determined: #{user_map}")
+        UI.message("User Mapping determined: #{user_map}")
         user_map
       end
 
       # Reads all labels from the source project and create them in the destination project
       # Labels are later referenced by name, so we dont need to return an ID-Mapping
       def self.migrate_labels(gitlab_src, gitlab_dst, project_src, project_dst)
-        Helper.log.info("Creating Labels")
+        UI.message("Creating Labels")
         labels = gitlab_src.labels(project_src.id)
 
         labels.each do |label| 
           gitlab_dst.create_label(project_dst.id, label.name, label.color)
         end
-        Helper.log.info("Labels created")
+        UI.message("Labels created")
       end
 
       # Reads all milestones from the source project and create them in the destination project
       # Milestones are later referenced by ID, so we need to return a mapping from milestone-id in the old project to milestone-id in the new project
       def self.migrate_milestones(gitlab_src, gitlab_dst, project_src, project_dst) 
-        Helper.log.info("Migrating Milestones")
+        UI.message("Migrating Milestones")
         milestone_map = {}
         read_milestones(gitlab_src, project_src).each do |milestone|
           new_milestone = gitlab_dst.create_milestone(project_dst.id, 
@@ -116,15 +116,15 @@ module Fastlane
           end
           milestone_map[milestone.id] = new_milestone.id
         end
-        Helper.log.info("Milestones migrated, milestone map generated: #{milestone_map}")
+        UI.message("Milestones migrated, milestone map generated: #{milestone_map}")
         milestone_map
       end
 
       def self.migrate_issues(gitlab_src, gitlab_dst, project_src, project_dst, usermap, milestonemap)
-        Helper.log.info("Creating Issues")
+        UI.message("Creating Issues")
 
-        Helper.log.info("Usermap: #{usermap}")
-        Helper.log.info("Milestonemap: #{milestonemap}")
+        UI.message("Usermap: #{usermap}")
+        UI.message("Milestonemap: #{milestonemap}")
 
         read_issues(gitlab_src, project_src).each do |issue|
 
@@ -144,16 +144,16 @@ module Fastlane
           migrate_issue_notes(gitlab_src, gitlab_dst, project_src, project_dst, issue, new_issue, usermap)
         end
 
-        Helper.log.info("Issues created")
+        UI.message("Issues created")
       end
 
       def self.migrate_issue_notes(gitlab_src, gitlab_dst, project_src, project_dst, issue_src, issue_dst, usermap)
-        Helper.log.info("Migrating issue notes for issue #{issue_src.id}")
+        UI.message("Migrating issue notes for issue #{issue_src.id}")
         read_issue_notes(gitlab_src, project_src, issue_src).each do |note|
           body = "_Original comment by #{note.author.username} on #{Time.parse(note.created_at).strftime("%d %b %Y, %H:%M")}_\n\n---\n\n#{note.body}"
           gitlab_dst.create_issue_note(project_dst.id, issue_dst.id, body)
         end
-        Helper.log.info("Migrated issue notes for issue #{issue_src.id}")
+        UI.message("Migrated issue notes for issue #{issue_src.id}")
       end
 
       #
