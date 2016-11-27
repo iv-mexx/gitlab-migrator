@@ -131,10 +131,21 @@ I've put this into my `~/.zshrc` (because I did not find out how else to set thi
 * labels
 * notes (see caveats)
 
+### Snippets
+
+* project
+* name
+* filename
+* code
+* notes (see caveats)
+* ❗️author is not migrated
+  * author of the new snippet is the user thats performing the migration
+* ❗️visibility level is not migrated
+  * snippets will be created with visibility level = 'internal'
+
 ## Whats not being migrated
 
 * Merge Requests + Notes
-* Snippets + Notes
 * System Hooks
 * Users
 
