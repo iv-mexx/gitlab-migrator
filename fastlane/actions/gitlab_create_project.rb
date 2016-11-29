@@ -57,7 +57,7 @@ module Fastlane
       # If necessary, a group with that path-name is created
       # The group (in the destination gitlab) is returned
       def self.ensure_group(gitlab_src, gitlab_dst, namespace, user_mapping)
-        Helper.log.info("Searching for group with name '#{namespace.name}' and path: '#{namespace.path}'")
+        UI.message("Searching for group with name '#{namespace.name}' and path: '#{namespace.path}'")
         group = gitlab_dst.groups.auto_paginate.select { |g| g.path == namespace.path}.first
         if group
           UI.message("Existing group '#{group.name}' found")
@@ -97,7 +97,7 @@ module Fastlane
       # Reads all labels from the source project and create them in the destination project
       # Labels are later referenced by name, so we dont need to return an ID-Mapping
       def self.migrate_labels(gitlab_src, gitlab_dst, project_src, project_dst)
-        Helper.log.info("Creating Labels")
+        UI.message("Creating Labels")
         labels = gitlab_src.labels(project_src.id).auto_paginate.each do |label|
           gitlab_dst.create_label(project_dst.id, label.name, label.color)
         end
@@ -105,7 +105,7 @@ module Fastlane
       end
 
       def self.migrate_snippets(gitlab_src, gitlab_dst, project_src, project_dst, user_mapping)
-        Helper.log.info("Migrating snippets")
+        UI.message("Migrating snippets")
         snipptes = gitlab_src.snippets(project_src.id).auto_paginate.each do |snippet|
           code = gitlab_src.snippet_content(project_src.id, snippet.id)
           new_snippet = gitlab_dst.create_snippet(project_dst.id, { 
@@ -119,21 +119,21 @@ module Fastlane
       end
 
       def self.migrate_snippet_notes(gitlab_src, gitlab_dst, project_src, project_dst, snippet_src, snippet_dst, usermap)
-        Helper.log.info("Migrating snippet notes for snippet #{snippet_src.id}")
+        UI.message("Migrating snippet notes for snippet #{snippet_src.id}")
         gitlab_src.snippet_notes(project_src.id, snippet_src.id).auto_paginate.sort { |n1, n2| n1.id <=> n2.id }.each do |note |
           body = "_Original comment by #{note.author.username} on #{Time.parse(note.created_at).strftime("%d %b %Y, %H:%M")}_\n\n---\n\n#{note.body}"
           gitlab_dst.create_snippet_note(project_dst.id, snippet_dst.id, body)
         end
-        Helper.log.info("Migrated snippet notes for snippet #{snippet_src.id}")
+        UI.message("Migrated snippet notes for snippet #{snippet_src.id}")
       end
 
       # Reads all deploy-keys from the source project and create them in the destination project
       def self.migrate_deploy_keys(gitlab_src, gitlab_dst, project_src, project_dst)
-        Helper.log.info("Creating Deploy-Keys")
+        UI.message("Creating Deploy-Keys")
         labels = gitlab_src.deploy_keys(project_src.id).auto_paginate.each do |key|
           gitlab_dst.create_deploy_key(project_dst.id, key.title, key.key)
         end
-        Helper.log.info("Deploy-Keys created")
+        UI.message("Deploy-Keys created")
       end
 
       # Reads all milestones from the source project and create them in the destination project
@@ -183,7 +183,7 @@ module Fastlane
       end
 
       def self.migrate_issue_notes(gitlab_src, gitlab_dst, project_src, project_dst, issue_src, issue_dst, usermap)
-        Helper.log.info("Migrating issue notes for issue #{issue_src.id}")
+        UI.message("Migrating issue notes for issue #{issue_src.id}")
         gitlab_src.issue_notes(project_src.id, issue_src.id).auto_paginate.sort { |n1, n2| n1.id <=> n2.id }.each  do |note|
           body = "_Original comment by #{note.author.username} on #{Time.parse(note.created_at).strftime("%d %b %Y, %H:%M")}_\n\n---\n\n#{note.body}"
           gitlab_dst.create_issue_note(project_dst.id, issue_dst.id, body)

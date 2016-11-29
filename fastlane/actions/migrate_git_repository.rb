@@ -7,21 +7,10 @@ module Fastlane
     class MigrateGitRepositoryAction < Action
       def self.run(params)
         Dir.mktmpdir do |tmpdir|
-<<<<<<< HEAD
           UI.message ("Cloning Repository from #{params[:from_repo_url]} into #{tmpdir}")
-          Actions.sh("git clone #{params[:from_repo_url]} #{tmpdir}")
-          Dir.chdir(tmpdir) do
-            Actions.sh("git remote add newOrigin #{params[:to_repo_url]}")
-            default_branch = Actions.sh("git rev-parse --abbrev-ref HEAD")
-            Actions.sh("for remote in `git branch -r | grep -v #{default_branch} `; do git checkout --track $remote ; done")
-            UI.message ("Pushing all branches and tags to #{params[:to_repo_url]}")
-            Actions.sh("git push newOrigin --all")
-            Actions.sh("git push newOrigin --tags")
-=======
-          Helper.log.info "Cloning Repository from #{params[:from_repo_url]} into #{tmpdir}"
           clone_result = Actions.sh("git clone #{params[:from_repo_url]} #{tmpdir}")
           if clone_result.include?("warning: You appear to have cloned an empty repository.")
-              Helper.log.info "Skipping empty repository #{params[:to_repo_url]}"
+              UI.message ("Skipping empty repository #{params[:to_repo_url]}")
           else
             Dir.chdir(tmpdir) do
               Actions.sh("git remote add newOrigin #{params[:to_repo_url]}")
@@ -30,7 +19,7 @@ module Fastlane
               Actions.sh("git push newOrigin --all")
               Actions.sh("git push newOrigin --tags")
             end
->>>>>>> 916600ca817490028df15b82ab4e4883453093cd
+
           end
         end
       end

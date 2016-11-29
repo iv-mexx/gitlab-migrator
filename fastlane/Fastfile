@@ -88,13 +88,13 @@ platform :ios do
       )
     elsif projects_dst.count == 1
       new_project = projects_dst.first
-      Helper.log.info("Project exists already, only migrating the repository")
+      UI.important("Project exists already, only migrating the repository")
     else
-      Helper.log.error("Several potential target projects exist: #{projects_dst}")
+      UI.error("Several potential target projects exist: #{projects_dst}")
       raise "Several potential target projects exist, dont know which one to pick"
     end
 
-    Helper.log.info("Gitlab project has been migrated, now migrate the repository")
+    UI.message("Gitlab project has been migrated, now migrate the repository")
 
     if ENV["FL_GIT_PROTOCOL_SRC"] && (ENV["FL_GIT_PROTOCOL_SRC"].downcase == 'https')
       git_protocol_src = project.http_url_to_repo
@@ -111,7 +111,7 @@ platform :ios do
     migrate_git_repository(from_repo_url: git_protocol_src, to_repo_url: git_protocol_dst)
 
     if project.wiki_enabled
-      Helper.log.info("Migrating wiki-repository")
+      UI.message("Migrating wiki-repository")
       migrate_git_repository(from_repo_url: git_protocol_src.gsub('.git', '.wiki.git'), to_repo_url: git_protocol_dst.gsub('.git', '.wiki.git'))
     end
   end
