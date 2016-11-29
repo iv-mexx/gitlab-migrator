@@ -46,19 +46,19 @@ platform :ios do
       puts "All projects have already been migrated"
     else
       puts "These project are not yet migrated:"
-      projects_not_migrated.each do |p| 
+      projects_not_migrated.each do |p|
         puts "\t⚠️  #{p.path_with_namespace}"
       end
     end
 
-    if projects_already_migrated.empty? 
+    if projects_already_migrated.empty?
       puts "No projecst migrated yet"
     else
       puts "These project have already been migrated:"
       projects_already_migrated.each do |p|
         puts "\t✅  #{p.path_with_namespace}"
       end
-    end 
+    end
 
     if not projects_not_in_src.empty?
       puts "There are new projects that exist not in the original gitlab instance"
@@ -80,33 +80,47 @@ platform :ios do
     project = projects_src.first
     UI.message("Checking the destination for existing project #{project_path}")
     projects_dst = gitlab_get_projects(endpoint: ENV["FL_GITLAB_ENDPOINT_DST"], api_token: ENV["FL_GITLAB_TOKEN_DST"]).select { |p| p.path_with_namespace == project_path }
-    
+
     if projects_dst.empty?
       UI.message("Checks OK, Starting to migrate project #{project_path} to #{ENV['FL_GITLAB_ENDPOINT_DST']}")
       new_project = gitlab_create_project(
-        endpoint_src: ENV["FL_GITLAB_ENDPOINT_SRC"], 
-        api_token_src: ENV["FL_GITLAB_TOKEN_SRC"], 
-        endpoint_dst: ENV["FL_GITLAB_ENDPOINT_DST"], 
-        api_token_dst: ENV["FL_GITLAB_TOKEN_DST"], 
         project: project
       )
     elsif projects_dst.count == 1
       new_project = projects_dst.first
-      UI.important("Project exists already, only migrating the repository")
-    else 
-      UI.error("Several potential target projects exist: #{projects_dst}")
+      Helper.log.info("Project exists already, only migrating the repository")
+    else
+      Helper.log.error("Several potential target projects exist: #{projects_dst}")
       raise "Several potential target projects exist, dont know which one to pick"
     end
 
-    UI.message("Gitlab project has been migrated, now migrate the repository")
-    migrate_git_repository(from_repo_url: project.ssh_url_to_repo, to_repo_url: new_project.ssh_url_to_repo)
+    Helper.log.info("Gitlab project has been migrated, now migrate the repository")
+
+    if ENV["FL_GIT_PROTOCOL_SRC"] && (ENV["FL_GIT_PROTOCOL_SRC"].downcase == 'https')
+      git_protocol_src = project.http_url_to_repo
+    else
+      git_protocol_src = project.ssh_url_to_repo
+    end
+
+    if ENV["FL_GIT_PROTOCOL_DST"] && (ENV["FL_GIT_PROTOCOL_DST"].downcase == 'https')
+      git_protocol_dst = new_project.http_url_to_repo
+    else
+      git_protocol_dst = new_project.ssh_url_to_repo
+    end
+
+    migrate_git_repository(from_repo_url: git_protocol_src, to_repo_url: git_protocol_dst)
+
+    if project.wiki_enabled
+      Helper.log.info("Migrating wiki-repository")
+      migrate_git_repository(from_repo_url: git_protocol_src.gsub('.git', '.wiki.git'), to_repo_url: git_protocol_dst.gsub('.git', '.wiki.git'))
+    end
   end
 
   # You can define as many lanes as you want
 
   after_all do |lane|
     # This block is called, only if the executed lane was successful
-    
+
     # slack(
     #   message: "Successfully deployed new App Update."
     # )

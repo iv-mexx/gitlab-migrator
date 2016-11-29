@@ -15,7 +15,7 @@ This tool is based on [fastlane](https://fastlane.tools), different actions are 
 You can print a list of all projects on the source gitlab with this command:
 
 ```
-fastlane list_projects
+bundle exec fastlane list_projects
 ```` 
 
 This will also show projects that have already been migrated.
@@ -27,7 +27,7 @@ This will also show projects that have already been migrated.
 You can migrate a specific project with this command:
 
 ```
-fastlane migrate project:<project_path>
+bundle exec fastlane migrate project:<project_path>
 ```
 
 The `project_path` is the full path to the project in gitlab (including the namespace), you can take the a path as printed in the `list_projects` action. 
@@ -36,7 +36,15 @@ As an example, `fastlane migrate project:mexx-uni/pue1` will migrate the project
 
 ## Setup
 
-The setup is as simple as running
+All necessary dependencies can be installed via [bundler](http://bundler.io). 
+
+To install bundler, run
+
+```
+gem install bundler
+```
+
+To install the dependencies via bundler, run
 
 ```
 bundle install
@@ -54,7 +62,7 @@ PI="namespace/project2 namespace/project2"
 
 for i in $PI; do
 	echo "Migrate Project: $i"
-	fastlane migrate project:$i
+	bundle exec fastlane migrate project:$i
 done
 ```
 
@@ -69,6 +77,12 @@ Two pieces of information are necessary for each gitlab instance:
 
 * `FL_GITLAB_ENDPOINT_SRC` / `FL_GITLAB_ENDPOINT_DST`: API endpoint URL, e.g. `https://example.net/api/v3`
 * `FL_GITLAB_TOKEN_SRC` / `FL_GITLAB_TOKEN_DST`: User's private token or OAuth2 access token. [How to get your private token](https://www.safaribooksonline.com/library/view/gitlab-cookbook/9781783986842/ch06s05.html)
+
+### Git Protocol
+
+Optionaly you can choose the protocol to access the git repo (clone, push, etc). Default is ssh.
+* `FL_GIT_PROTOCOL_SRC` / `FL_GIT_PROTOCOL_DST`: GIT Protocol, e.g. `ssh`
+
 
 ### Self-Signed SSH Certificates
 
@@ -87,11 +101,13 @@ I've put this into my `~/.zshrc` (because I did not find out how else to set thi
 * group
 * namespace
 * wiki_enabled
+* wiki (if enabled)
 * wall_enabled
 * issues_enabled
 * snippets_enabled
 * merge_requests_enabled
 * public
+* deploy keys
 
 ### Labels
 
@@ -115,10 +131,21 @@ I've put this into my `~/.zshrc` (because I did not find out how else to set thi
 * labels
 * notes (see caveats)
 
+### Snippets
+
+* project
+* name
+* filename
+* code
+* notes (see caveats)
+* ❗️author is not migrated
+  * author of the new snippet is the user thats performing the migration
+* ❗️visibility level is not migrated
+  * snippets will be created with visibility level = 'internal'
+
 ## Whats not being migrated
 
 * Merge Requests + Notes
-* Snippets + Notes
 * System Hooks
 * Users
 
