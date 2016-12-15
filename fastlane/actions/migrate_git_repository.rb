@@ -7,10 +7,10 @@ module Fastlane
     class MigrateGitRepositoryAction < Action
       def self.run(params)
         Dir.mktmpdir do |tmpdir|
-          Helper.log.info "Cloning Repository from #{params[:from_repo_url]} into #{tmpdir}"
+          UI.message ("Cloning Repository from #{params[:from_repo_url]} into #{tmpdir}")
           clone_result = Actions.sh("git clone #{params[:from_repo_url]} #{tmpdir}")
           if clone_result.include?("warning: You appear to have cloned an empty repository.")
-              Helper.log.info "Skipping empty repository #{params[:to_repo_url]}"
+              UI.message ("Skipping empty repository #{params[:to_repo_url]}")
           else
             Dir.chdir(tmpdir) do
               Actions.sh("git remote add newOrigin #{params[:to_repo_url]}")
@@ -19,6 +19,7 @@ module Fastlane
               Actions.sh("git push newOrigin --all")
               Actions.sh("git push newOrigin --tags")
             end
+
           end
         end
       end
