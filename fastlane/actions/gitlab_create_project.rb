@@ -170,7 +170,10 @@ module Fastlane
             description: issue.description,
             assignee_id: assignee_id,
             milestone_id: milestone_id,
-            labels: issue.labels.join(",")
+            labels: issue.labels.join(","),
+            due_date: issue.due_date,
+            created_at: issue.created_at,
+            updated_at: issue.updated_at
             )
 
           if issue.state == "closed"
