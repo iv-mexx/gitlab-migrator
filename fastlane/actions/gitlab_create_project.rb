@@ -118,9 +118,16 @@ module Fastlane
         UI.message("Migrating snippets")
         snipptes = gitlab_src.snippets(project_src.id).auto_paginate.each do |snippet|
           code = gitlab_src.snippet_content(project_src.id, snippet.id)
+          UI.message("Snippet: '#{snippet.title}'")
+          if snippet.file_name.empty?
+            snippet_file_name = snippet.title.delete(' ') + "." + snippet.id.to_s
+          else
+            snippet_file_name = snippet.file_name
+          end
+          UI.message("Snippet filename '#{snippet_file_name}'")
           new_snippet = gitlab_dst.create_snippet(project_dst.id, { 
             title: snippet.title, 
-            file_name: snippet.file_name, 
+            file_name: snippet_file_name,
             code: code, 
             visibility_level: 10
           })
