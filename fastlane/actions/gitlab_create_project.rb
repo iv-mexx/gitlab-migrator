@@ -10,7 +10,11 @@ module Fastlane
         source = Gitlab.client(endpoint: params[:endpoint_src], private_token: params[:api_token_src])
         destination = Gitlab.client(endpoint: params[:endpoint_dst], private_token: params[:api_token_dst])
         original_project = params[:project]
-        owner_id = original_project.owner.id
+        if original_project.owner
+          owner_id = original_project.owner.id
+        else
+          owner_id = -1
+        end
         UI.message ("Creating Project: #{original_project.path_with_namespace}")
 
         # Estimate User-Mapping
