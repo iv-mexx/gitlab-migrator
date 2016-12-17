@@ -120,6 +120,7 @@ module Fastlane
           code = gitlab_src.snippet_content(project_src.id, snippet.id)
           UI.message("Snippet: '#{snippet.title}'")
           if snippet.file_name.empty?
+            # TODO: make sure 'snippet_file_name' contains only letters, digits, '_', '-', '@' and '.' 
             snippet_file_name = snippet.title.delete(' ') + "." + snippet.id.to_s
           else
             snippet_file_name = snippet.file_name
