@@ -63,7 +63,6 @@ module Fastlane
       def self.ensure_group(gitlab_src, gitlab_dst, namespace, user_mapping, dst_owner_id)
         UI.message("Searching for group with name '#{namespace.name}' and path: '#{namespace.path}'")
         group = gitlab_dst.groups.auto_paginate.select { |g| g.path == namespace.path}.first
-        users_des = gitlab_dst.users.auto_paginate
         if group
           UI.message("Existing group '#{group.name}' found")
         else
