@@ -10,13 +10,17 @@ module Fastlane
         source = Gitlab.client(endpoint: params[:endpoint_src], private_token: params[:api_token_src])
         destination = Gitlab.client(endpoint: params[:endpoint_dst], private_token: params[:api_token_dst])
         original_project = params[:project]
+        if original_project.owner
+          owner_id = original_project.owner.id
+        else
+          owner_id = -1
+        end
         UI.message ("Creating Project: #{original_project.path_with_namespace}")
 
         # Estimate User-Mapping
         user_mapping = map_users(source, destination)
-
         # Check if the Group and Namespace for the Project exist already
-        group = ensure_group(source, destination, original_project.namespace, user_mapping)
+        group = ensure_group(source, destination, original_project.namespace, user_mapping, user_mapping[owner_id])
 
         # Create the project
         new_project = destination.create_project(original_project.name,
@@ -56,20 +60,26 @@ module Fastlane
       # checks if a group with the same path-name exists in the destination gitlab.
       # If necessary, a group with that path-name is created
       # The group (in the destination gitlab) is returned
-      def self.ensure_group(gitlab_src, gitlab_dst, namespace, user_mapping)
+      def self.ensure_group(gitlab_src, gitlab_dst, namespace, user_mapping, dst_owner_id)
         UI.message("Searching for group with name '#{namespace.name}' and path: '#{namespace.path}'")
         group = gitlab_dst.groups.auto_paginate.select { |g| g.path == namespace.path}.first
+        users_des = gitlab_dst.users.auto_paginate
         if group
           UI.message("Existing group '#{group.name}' found")
         else
-          UI.message("Group '#{namespace.name}' does not yet exist, will be created now")
-          group = gitlab_dst.create_group(namespace.name, namespace.path)
-          # Populate group with users
-          # Keep in mind: User-Mapping is estimated and not garuanteed. Users have to exist in the new gitlab 
-          # before migrating projects and their name or username has to match their name/username in the old gitlab
-          original_group = gitlab_src.group(namespace.id)
-          gitlab_src.group_members(original_group.id).auto_paginate do |user|
-            gitlab_dst.add_group_member(group.id, user_mapping[user.id], user.access_level) if user_mapping[user.id]
+          group = gitlab_dst.namespaces.auto_paginate.select { |g| g.id == dst_owner_id and g.kind == 'user'}.first
+          if group
+            UI.message("Existing namespace id '#{group.id}' path '#{group.path}' kind '#{group.kind}'")
+          else
+            UI.message("Group '#{namespace.name}' does not yet exist, will be created now")
+            group = gitlab_dst.create_group(namespace.name, namespace.path)
+            # Populate group with users
+            # Keep in mind: User-Mapping is estimated and not guaranteed. Users have to exist in the new gitlab 
+            # before migrating projects and their name or username has to match their name/username in the old gitlab
+            original_group = gitlab_src.group(namespace.id)
+            gitlab_src.group_members(original_group.id).auto_paginate do |user|
+              gitlab_dst.add_group_member(group.id, user_mapping[user.id], user.access_level) if user_mapping[user.id]
+            end
           end
         end
         group
@@ -108,9 +118,17 @@ module Fastlane
         UI.message("Migrating snippets")
         snipptes = gitlab_src.snippets(project_src.id).auto_paginate.each do |snippet|
           code = gitlab_src.snippet_content(project_src.id, snippet.id)
+          UI.message("Snippet: '#{snippet.title}'")
+          if snippet.file_name.empty?
+            # TODO: make sure 'snippet_file_name' contains only letters, digits, '_', '-', '@' and '.' 
+            snippet_file_name = snippet.title.delete(' ') + "." + snippet.id.to_s
+          else
+            snippet_file_name = snippet.file_name
+          end
+          UI.message("Snippet filename '#{snippet_file_name}'")
           new_snippet = gitlab_dst.create_snippet(project_dst.id, { 
             title: snippet.title, 
-            file_name: snippet.file_name, 
+            file_name: snippet_file_name,
             code: code, 
             visibility_level: 10
           })
@@ -170,7 +188,10 @@ module Fastlane
             description: issue.description,
             assignee_id: assignee_id,
             milestone_id: milestone_id,
-            labels: issue.labels.join(",")
+            labels: issue.labels.join(","),
+            due_date: issue.due_date,
+            created_at: issue.created_at,
+            updated_at: issue.updated_at
             )
 
           if issue.state == "closed"
